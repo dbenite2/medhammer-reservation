@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Calendar, dayjsLocalizer } from 'react-big-calendar';
+import { Calendar, dayjsLocalizer, type View } from 'react-big-calendar';
 import dayjs from 'dayjs';
 import { Dialog, DialogTitle, DialogContent, InputLabel, Select, Button, FormControl, MenuItem, TextField } from '@mui/material';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -7,12 +7,13 @@ import { supabase } from '../lib/supabase';
 
 // Setup the localizer for the calendar using dayjs
 const localizer = dayjsLocalizer(dayjs);
-
+type ViewType = View //'month' | 'week' | 'day';
 const MasterCalendarView = ()=> {
   const [events, setEvents] = useState<any[]>([]); // Your Supabase data goes here
   const [tables, setTables] = useState<any[]>([]);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedView, setSelectedView] = useState<ViewType>('month');
 
   const [selectedTime, setSelectedTime] = useState("18:00");
   const [playtime, setPlaytime] = useState(1);
@@ -105,6 +106,8 @@ const MasterCalendarView = ()=> {
         selectable={true}
         onSelectSlot={handleSelectSlot} // The magic click handler
         views={['month', 'week', 'day']}
+        view={selectedView}
+        onView={setSelectedView}
         style={{height: '100%'}}
         onSelectEvent={handleSelectEvent}
       />
