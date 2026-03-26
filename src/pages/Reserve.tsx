@@ -10,11 +10,10 @@ const localizer = dayjsLocalizer(dayjs);
 type ViewType = View //'month' | 'week' | 'day';
 const MasterCalendarView = ()=> {
   const [events, setEvents] = useState<any[]>([]); // Your Supabase data goes here
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [tables, setTables] = useState<any[]>([]);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedView, setSelectedView] = useState<ViewType>('month');
-
   const [selectedTime, setSelectedTime] = useState("18:00");
   const [playtime, setPlaytime] = useState(1);
   const [selectedTableId, setSelectedTableId] = useState("");
@@ -60,9 +59,13 @@ const MasterCalendarView = ()=> {
     }
   };
 
+
+ const handleNavigate = (newDate: Date) => {
+   setSelectedDate(newDate);
+  }
+
   // This fires when a user clicks a day on the calendar
   const handleSelectSlot = ({ start }: { start: Date }) => {
-    setSelectedDate(start);
     setIsBookingModalOpen(true);
   };
 
@@ -104,6 +107,8 @@ const MasterCalendarView = ()=> {
         startAccessor="start"
         endAccessor="end"
         selectable={true}
+        date={selectedDate}
+        onNavigate={handleNavigate}
         onSelectSlot={handleSelectSlot} // The magic click handler
         views={['month', 'week', 'day']}
         view={selectedView}
