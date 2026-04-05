@@ -1,20 +1,21 @@
-import { useEffect, useState } from 'react';
-import { Calendar, dayjsLocalizer } from 'react-big-calendar';
+import { useCallback, useEffect, useState } from 'react';
+import { Calendar, dayjsLocalizer, type View } from 'react-big-calendar';
 import dayjs from 'dayjs';
-import { Dialog, DialogTitle, DialogContent, InputLabel, Select, Button, FormControl, MenuItem } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, InputLabel, Select, Button, FormControl, MenuItem, TextField } from '@mui/material';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { supabase } from '../lib/supabase';
 
 // Setup the localizer for the calendar using dayjs
 const localizer = dayjsLocalizer(dayjs);
-
-export default function MasterCalendarView() {
+type ViewType = View //'month' | 'week' | 'day';
+const MasterCalendarView = ()=> {
   const [events, setEvents] = useState<any[]>([]); // Your Supabase data goes here
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [tables, setTables] = useState<any[]>([]);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
+  const [selectedView, setSelectedView] = useState<ViewType>('month');
   const [selectedTime, setSelectedTime] = useState("18:00");
+  const [playtime, setPlaytime] = useState(1);
   const [selectedTableId, setSelectedTableId] = useState("");
 
   useEffect(() => {
@@ -43,23 +44,28 @@ export default function MasterCalendarView() {
       const formattedEvents = data.map((res) => {
         // Combine date and time strings: "2026-03-15T19:00:00"
         const startDateTime = dayjs(`${res.reservation_date}T${res.start_time}`).toDate();
-        // Assuming each reservation is 1 hour for the visual block
-        const endDateTime = dayjs(startDateTime).add(1, 'hour').toDate(); 
-
+        // Assuming each reservation is 3 hour for the visual block
+        const endDateTime = dayjs(startDateTime).add(res.play_time, 'hour').toDate();
+        
         return {
           id: res.id,
-          title: `Table ${res.restaurant_tables.table_number} Booked`,
+          title: `Table ${res.game_tables.table_number} is Booked from ${startDateTime.getHours()}:00 to ${endDateTime.getHours()}:00`,
           start: startDateTime,
           end: endDateTime,
         };
       });
+      debugger;
       setEvents(formattedEvents);
     }
   };
 
+
+ const handleNavigate = (newDate: Date) => {
+   setSelectedDate(newDate);
+  }
+
   // This fires when a user clicks a day on the calendar
   const handleSelectSlot = ({ start }: { start: Date }) => {
-    setSelectedDate(start);
     setIsBookingModalOpen(true);
   };
 
@@ -75,8 +81,9 @@ export default function MasterCalendarView() {
         {
             user_id: user.id,
             table_id: selectedTableId,
-            reservation_time: formattedDate,
+            reservation_date: formattedDate,
             start_time: `${selectedTime}:00`,
+            play_time: playtime,
             status: 'confirmed',
         }
     ]);
@@ -89,6 +96,9 @@ export default function MasterCalendarView() {
         fetchReservations();
     }
   }
+
+  const handleSelectEvent = useCallback((event: any) => window.alert(event.title), []);
+
   return (
     <div style={{ height: '80vh' }}>
       <Calendar
@@ -97,9 +107,14 @@ export default function MasterCalendarView() {
         startAccessor="start"
         endAccessor="end"
         selectable={true}
+        date={selectedDate}
+        onNavigate={handleNavigate}
         onSelectSlot={handleSelectSlot} // The magic click handler
         views={['month', 'week', 'day']}
+        view={selectedView}
+        onView={setSelectedView}
         style={{height: '100%'}}
+        onSelectEvent={handleSelectEvent}
       />
 
       {/* The MUI Modal that pops up to make a new reservation */}
@@ -110,15 +125,30 @@ export default function MasterCalendarView() {
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
           
           <FormControl fullWidth>
-            <InputLabel>Time</InputLabel>
+            <InputLabel>Start Time</InputLabel>
             <Select
               value={selectedTime}
               label="Time"
               onChange={(e) => setSelectedTime(e.target.value)}
             >
+                {/* put this into an array of available times */}
               <MenuItem value="18:00">6:00 PM</MenuItem>
               <MenuItem value="19:00">7:00 PM</MenuItem>
               <MenuItem value="20:00">8:00 PM</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth>
+            <InputLabel>Play Time</InputLabel>
+            <Select
+              value={playtime}
+              label="Play Time"
+              onChange={(e) => setPlaytime(Number(e.target.value))}
+            >
+                {/* put this into an array of available times */}
+              <MenuItem value={1}>1H</MenuItem>
+              <MenuItem value={2}>2H</MenuItem>
+              <MenuItem value={3}>3H</MenuItem>
             </Select>
           </FormControl>
 
@@ -146,3 +176,5 @@ export default function MasterCalendarView() {
     </div>
   );
 }
+
+export default MasterCalendarView;
