@@ -3,8 +3,7 @@ import { Calendar, dayjsLocalizer, type View } from 'react-big-calendar';
 import dayjs from 'dayjs';
 import { Dialog, DialogTitle, DialogContent, InputLabel, Select, Button, FormControl, MenuItem, TextField } from '@mui/material';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { supabase } from '../lib/supabase';
-
+import './Reserve.css';
 // Setup the localizer for the calendar using dayjs
 const localizer = dayjsLocalizer(dayjs);
 type ViewType = View //'month' | 'week' | 'day';
@@ -100,7 +99,7 @@ const MasterCalendarView = ()=> {
   const handleSelectEvent = useCallback((event: any) => window.alert(event.title), []);
 
   return (
-    <div style={{ height: '80vh' }}>
+    <div style={{ height: '80vh' }} className="rbc-calendar">
       <Calendar
         localizer={localizer}
         events={events}
