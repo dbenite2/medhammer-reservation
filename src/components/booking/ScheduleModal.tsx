@@ -1,7 +1,8 @@
-import { Button, Dialog, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select } from "@mui/material"
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material"
 import dayjs from "dayjs"
 import type { Dispatch, SetStateAction } from "react";
-import { hourOptions, playTimesOptions } from "../../utils/Constants";
+import { hourOptionValues, playTimeOptionValues } from "../../utils/Constants";
+import { useTranslate } from "../../i18n/useTranslate";
 
 interface Props {
     modalOpen: boolean;
@@ -11,62 +12,82 @@ interface Props {
     selectedTableId: string;
     handleModalClose: () => void;
     setSelectedTableId: Dispatch<SetStateAction<string>>;
-    setPlayTime: Dispatch<SetStateAction<string | number>>
-    setSelectedTime: Dispatch<SetStateAction<string | number>>;
+    setPlayTime: Dispatch<SetStateAction<number>>
+    setSelectedTime: Dispatch<SetStateAction<string>>;
     tables: any[];
     handleCreateReservation: () => Promise<void>;
 }
 
 const ScheduleModal = ({modalOpen, selectedDate, selectedTime, playTime, handleModalClose ,setPlayTime , setSelectedTime, tables, handleCreateReservation, selectedTableId, setSelectedTableId}: Props) => {
+    const translate = useTranslate();
+
     return (
     <Dialog open={modalOpen} onClose={handleModalClose} fullWidth maxWidth="sm">
-    <DialogTitle>
-      New Reservation: {selectedDate ? dayjs(selectedDate).format('MMMM D, YYYY') : ''}
+    <DialogTitle sx={{ pb: 1 }}>
+      {translate("reservation.form.title")}
     </DialogTitle>
-    <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 3}}>
+    <DialogContent sx={{ pt: 1 }}>
+      <Stack spacing={2}>
+        <Typography variant="h6" component="p">
+          {selectedDate ? dayjs(selectedDate).format(translate("reservation.dateFormat")) : ''}
+        </Typography>
+
+        <Divider />
       
-      <FormControl sx={{mt: 3}} fullWidth>
-        <InputLabel>Start Time</InputLabel>
-        <Select
-          value={selectedTime}
-          label="Start Time"
-          onChange={(e) => setSelectedTime(e.target.value)}
-        >
-            {hourOptions.map((option) => (<MenuItem value={option.value}> {option.label} </MenuItem>))}
-        </Select>
-      </FormControl>
+        <Stack spacing={2}>
+          <FormControl fullWidth>
+            <InputLabel>{translate("reservation.form.startTimeLabel")}</InputLabel>
+            <Select
+              value={selectedTime}
+              label={translate("reservation.form.startTimeLabel")}
+              onChange={(e) => setSelectedTime(e.target.value)}
+            >
+                {hourOptionValues.map((value) => (
+                  <MenuItem key={value} value={value}>
+                    {translate(`reservation.hourOptions.${value}`)}
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl>
 
-      <FormControl fullWidth>
-        <InputLabel>Play Time</InputLabel>
-        <Select
-          value={playTime}
-          label="Play Time"
-          onChange={(e) => setPlayTime(Number(e.target.value))}
-        >
-            {playTimesOptions.map((option) => (<MenuItem value={option.value}> {option.label} </MenuItem>))}
-        </Select>
-      </FormControl>
+          <FormControl fullWidth>
+            <InputLabel>{translate("reservation.form.playTimeLabel")}</InputLabel>
+            <Select
+              value={playTime}
+              label={translate("reservation.form.playTimeLabel")}
+              onChange={(e) => setPlayTime(Number(e.target.value))}
+            >
+                {playTimeOptionValues.map((value) => (
+                  <MenuItem key={value} value={value}>
+                    {translate(`reservation.playTimeOptions.${value}`)}
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl>
 
-      <FormControl fullWidth>
-        <InputLabel>Game Table</InputLabel>
-        <Select
-          value={selectedTableId}
-          label="Game Table"
-          onChange={(e) => setSelectedTableId(e.target.value)}
-        >
-          {tables.map((table) => (
-            <MenuItem key={table.id} value={table.id}>
-              Table {table.table_number}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
-      <Button variant="contained" color="primary" onClick={handleCreateReservation} sx={{ mt: 2 }}>
-        Confirm Booking
-      </Button>
+          <FormControl fullWidth>
+            <InputLabel>{translate("reservation.form.gameTableLabel")}</InputLabel>
+            <Select
+              value={selectedTableId}
+              label={translate("reservation.form.gameTableLabel")}
+              onChange={(e) => setSelectedTableId(e.target.value)}
+            >
+              {tables.map((table) => (
+                <MenuItem key={table.id} value={table.id}>
+                  {translate("reservation.tableLabel", { tableNumber: table.table_number })}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Stack>
+      </Stack>
 
     </DialogContent>
+    <DialogActions sx={{ px: 3, pb: 3 }}>
+      <Button variant="contained" color="primary" onClick={handleCreateReservation}>
+        {translate("reservation.form.confirmButton")}
+      </Button>
+    </DialogActions>
   </Dialog>)
 }
 

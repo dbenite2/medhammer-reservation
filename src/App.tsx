@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from 'react' 
+import { useEffect, useState } from 'react' 
 import './App.css'
 import Reserve from './pages/Reserve'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -16,7 +16,7 @@ const App = () => {
   //   // document.documentElement.classList.toggle("dark", theme === "dark");
   //   // localStorage.setItem("theme", theme);
   // }, [theme]);
-  const [mode, setMode] = useState<'light' | 'dark'>('light');
+  const [mode] = useState<'light' | 'dark'>('light');
   
   const theme = createTheme({
     palette: {
@@ -25,9 +25,9 @@ const App = () => {
   });
 
 
-useEffect(() => {
-  document.documentElement.dataset.theme = mode;
-}, [mode]);
+  useEffect(() => {
+    document.documentElement.dataset.theme = mode;
+  }, [mode]);
 
   useEffect(() => {
     // 1. Get the session right when the app loads
@@ -41,10 +41,7 @@ useEffect(() => {
       setSession(session);
     });
 
-    const systemDark = window.matchMedia(
-      '(prefers-color-scheme: dark)'
-    ).matches
-    setMode(systemDark ? 'dark' : 'light');
+    // setMode(systemDark ? 'dark' : 'light');
 
     // Cleanup the listener when the component unmounts
     return () => subscription.unsubscribe();
