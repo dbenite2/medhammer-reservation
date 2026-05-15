@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import ScheduleModal from '../components/booking/ScheduleModal';
 import { defaultHourOption, defaultPlayTimeOption, lang } from '../utils/Constants';
 
+import './Reserve.css';
 // Setup the localizer for the calendar using dayjs
 const localizer = dayjsLocalizer(dayjs);
 type ViewType = View //'month' | 'week' | 'day';
@@ -110,7 +111,7 @@ const MasterCalendarView = ()=> {
   const handleSelectEvent = useCallback((event: any) => window.alert(event.title), []);
 
   return (
-    <div style={{ height: '80vh' }}>
+    <div style={{ height: '80vh' }} className="rbc-calendar">
       <Calendar
         localizer={localizer}
         events={events}
