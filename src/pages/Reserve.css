@@ -1,0 +1,92 @@
+/* in src/pages/Reserve.css */
+.rbc-calendar {
+  background: var(--bg);
+  color: var(--text);
+  /* color: red; */
+}
+
+.rbc-header {
+  color: var(--primary);
+  border-bottom: 1px solid var(--border);
+}
+
+.rbc-toolbar {
+    border-color: var(--btn-bg);
+}
+.rbc-toolbar .rbc-toolbar-label {
+  font-size: 2rem;
+  color: var(--primary);
+  /* color: red; */
+  /* background: var(--surface); */
+  /* border-bottom: 1px solid var(--border); */
+}
+
+.rbc-toolbar button.rbc-active {
+  background-color: var(--btn-active);
+  color: #0b1220;
+  /* border-color: var(--btn-bg); */
+  border: none;
+  &:focus, &:hover {
+    background-color: var(--btn-active);
+    color: #0b1220;
+    border-color: var(--btn-bg);
+    border: none;
+  }
+
+}
+
+
+button:focus:not(:focus-visible) {
+    outline: none;
+    background-color: var(--btn-active);
+    background: var(--btn-active);
+}
+
+.rbc-toolbar button
+    {
+        /* background: transparent; */
+        color: var(--btn-bg);
+        border-color: var(--btn-bg);
+        border: none;
+    }
+
+
+    .rbc-toolbar button:hover {
+        background: var(--btn-hover);
+        color: #0b1220;
+        border-color: var(--btn-bg);
+        border: none;
+    }
+.rbc-month-view,
+.rbc-time-view {
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.rbc-date-cell {
+  color: var(--text);
+}
+
+.rbc-off-range {
+  color: var(--muted-text);
+}
+
+.rbc-today {
+  background: var(--primary-soft);
+}
+
+.rbc-event {
+  background: var(--event-bg);
+  color: #0b1220;
+  border-radius: 6px;
+}
+
+.rbc-selected {
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+
+
+.rbc-selected-cell {
+  box-shadow: inset 0 0 0 2px var(--primary);
+}

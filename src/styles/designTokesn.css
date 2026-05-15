@@ -1,0 +1,42 @@
+/* // export const colors = {
+//   primary: "#1f2937", // dark gray
+//   secondary: "#4b5563", // medium gray
+//   accent: "#2563eb", // blue
+//   background: "#f9fafb", // light gray
+//   textPrimary: "#111827", // almost black
+//   textSecondary: "#6b7280", // gray for secondary text
+//   error: "#dc2626", // red for errors
+//   success: "#16a34a", // green for success messages
+// }; */
+
+[data-theme="dark"] {
+  --bg: #0b1220;
+  --surface: #111827;
+  --border: #202938;
+  --text: #e5e7eb;
+  --muted-text: #9ca3af;
+
+  --primary: #fb923c;        /* orange accent */
+  --primary-soft: #1f2933;   /* today background */
+  --event-bg: #fb923c;
+
+
+  --btn-bg: #fb923c;
+  --btn-hover: #f97316;
+  --btn-active: #ea580c;
+  --btn-disabled-bg: #7c2d12;
+  --btn-disabled-text: #fdba74;
+
+}
+
+[data-theme="light"] {
+  --bg: #f9fafb;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --text: #111827;
+  --muted-text: #6b7280;
+
+  --primary: #2563eb;        /* blue accent */
+  --primary-soft: #dbeafe;   /* today background */
+  --event-bg: #2563eb;
+}
