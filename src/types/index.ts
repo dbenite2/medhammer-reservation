@@ -4,3 +4,8 @@ export type Profile = {
     isActive: boolean;
     isEventOrganizer: boolean;
 }
+
+export type Option = {
+    value: string | number;
+    label: string;
+};

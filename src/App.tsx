@@ -73,6 +73,10 @@ useEffect(() => {
           path="/reserve" 
           element={session ? <Reserve /> : <Navigate to="/login" replace />} 
         />
+        <Route 
+          path="/" 
+          element={<Navigate to="/login" replace />} 
+        />
         {/* <Route
           path='/'
           element={
