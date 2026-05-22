@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material"
+import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material"
 import dayjs from "dayjs"
 import type { Dispatch, SetStateAction } from "react";
 import { hourOptionValues, playTimeOptionValues } from "../../utils/Constants";
@@ -16,9 +16,10 @@ interface Props {
     setSelectedTime: Dispatch<SetStateAction<string>>;
     tables: any[];
     handleCreateReservation: () => Promise<void>;
+    creatingReservation: boolean;
 }
 
-const ScheduleModal = ({modalOpen, selectedDate, selectedTime, playTime, handleModalClose ,setPlayTime , setSelectedTime, tables, handleCreateReservation, selectedTableId, setSelectedTableId}: Props) => {
+const ScheduleModal = ({modalOpen, selectedDate, selectedTime, playTime, handleModalClose ,setPlayTime , setSelectedTime, tables, handleCreateReservation, selectedTableId, setSelectedTableId, creatingReservation}: Props) => {
     const translate = useTranslate();
 
     return (
@@ -84,8 +85,15 @@ const ScheduleModal = ({modalOpen, selectedDate, selectedTime, playTime, handleM
 
     </DialogContent>
     <DialogActions sx={{ px: 3, pb: 3 }}>
-      <Button variant="contained" color="primary" onClick={handleCreateReservation}>
-        {translate("reservation.form.confirmButton")}
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleCreateReservation}
+        disabled={creatingReservation}
+        sx={{ gap: 1, minWidth: 170 }}
+      >
+        {creatingReservation && <CircularProgress size={18} color="inherit" />}
+        {creatingReservation ? translate("reservation.form.creatingButton") : translate("reservation.form.confirmButton")}
       </Button>
     </DialogActions>
   </Dialog>)

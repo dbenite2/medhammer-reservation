@@ -1,67 +1,106 @@
-import { supabase } from '../lib/supabase';
-import { Alert, Box, Button, Divider, Link, Paper, TextField, Typography } from '@mui/material';
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import { clearStoredInviteLink, hasStoredInviteLink, supabase } from '../lib/supabase';
+import { Box, Button, Paper, TextField, Typography } from '@mui/material';
+import type { AlertColor } from '@mui/material/Alert';
 import { useTranslate } from '../i18n/useTranslate';
+import InfoModal from '../components/common/InfoModal';
+
+type FeedbackModalState = {
+  open: boolean;
+  severity: AlertColor;
+  title: string;
+  message: string;
+};
+
+const closedFeedbackModal: FeedbackModalState = {
+  open: false,
+  severity: 'info',
+  title: '',
+  message: '',
+};
 
 const Login = () => {
   const translate = useTranslate();
-    // Toggle between Login and Registration mode
-  const [isSignUp, setIsSignUp] = useState(false);
+  const navigate = useNavigate();
+  const [isInviteRegistration] = useState(() => hasStoredInviteLink());
   
   // Form State
+  const [preferredName, setPreferredName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>(closedFeedbackModal);
+  const [navigateAfterFeedbackClose, setNavigateAfterFeedbackClose] = useState(false);
 
-  const handleGoogleSignIn = async () => {
-    setError(null);
-    setGoogleLoading(true);
+  const getFeedbackTitle = useCallback((severity: AlertColor) => {
+    if (severity === 'success') return translate("feedback.successTitle");
+    if (severity === 'error') return translate("feedback.errorTitle");
+    if (severity === 'warning') return translate("feedback.warningTitle");
+    return translate("feedback.infoTitle");
+  }, [translate]);
 
-    const { error: googleError } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/reserve`,
-      },
+  const showFeedbackModal = useCallback((severity: AlertColor, message: string) => {
+    setFeedbackModal({
+      open: true,
+      severity,
+      title: getFeedbackTitle(severity),
+      message,
     });
+  }, [getFeedbackTitle]);
 
-    if (googleError) {
-      setError(translate("auth.googleSignInError"));
-      setGoogleLoading(false);
+  const handleFeedbackModalClose = () => {
+    setFeedbackModal(closedFeedbackModal);
+
+    if (navigateAfterFeedbackClose) {
+      setNavigateAfterFeedbackClose(false);
+      navigate('/reserve', { replace: true });
     }
   };
 
+  useEffect(() => {
+    if (!isInviteRegistration) return;
+
+    supabase.auth.getUser().then(({ data: { user }, error: userError }) => {
+      if (userError || !user) {
+        showFeedbackModal('error', translate("auth.inviteInvalid"));
+        return;
+      }
+
+      setEmail(user.email ?? '');
+      setPreferredName(user.user_metadata?.preferred_name || user.user_metadata?.full_name || user.user_metadata?.name || '');
+    });
+  }, [isInviteRegistration, showFeedbackModal, translate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
 
     try {
-      if (isSignUp) {
-        // Create a new user
-        const { error: signUpError } = await supabase.auth.signUp({ 
-          email, 
-          password 
+      if (isInviteRegistration) {
+        const cleanPreferredName = preferredName.trim();
+        const { error: updateError } = await supabase.auth.updateUser({
+          password,
+          data: {
+            full_name: cleanPreferredName,
+            name: cleanPreferredName,
+            preferred_name: cleanPreferredName,
+          },
         });
-        if (signUpError) throw signUpError;
-        
-        // Supabase requires email verification by default
-        alert(translate("auth.signUpSuccess")); 
+
+        if (updateError) throw updateError;
+        clearStoredInviteLink();
+        setNavigateAfterFeedbackClose(true);
+        showFeedbackModal('success', translate("auth.inviteCompleteSuccess"));
       } else {
-        // Log in an existing user
-        const { error: signInError } = await supabase.auth.signInWithPassword({ 
-          email, 
-          password 
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password
         });
         if (signInError) throw signInError;
-        
-        // Note: You do NOT need a redirect here! 
-        // The listener we set up in App.tsx will catch the successful login 
-        // and automatically route the user to the calendar.
       }
     } catch {
-      setError(translate("auth.authenticationError"));
+      showFeedbackModal('error', translate("auth.authenticationError"));
     } finally {
       setLoading(false);
     }
@@ -71,28 +110,27 @@ const Login = () => {
     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10, px: 2 }}>
       <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 400 }}>
         <Typography variant="h5" align="center" gutterBottom fontWeight="bold">
-          {isSignUp ? translate("auth.signUpTitle") : translate("auth.signInTitle")}
+          {isInviteRegistration ? translate("auth.inviteTitle") : translate("auth.signInTitle")}
         </Typography>
 
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-
-        <Button
-          fullWidth
-          variant="outlined"
-          color="primary"
-          size="large"
-          disabled={googleLoading || loading}
-          onClick={handleGoogleSignIn}
-          sx={{ mt: 2, mb: 2 }}
-        >
-          {googleLoading ? translate("auth.googleProcessing") : translate("auth.continueWithGoogle")}
-        </Button>
-
-        <Divider sx={{ my: 2 }}>
-          {translate("auth.emailDivider")}
-        </Divider>
+        <Typography variant="body2" align="center" color="text.secondary" sx={{ mb: 2 }}>
+          {isInviteRegistration ? translate("auth.inviteHint") : translate("auth.existingUserHint")}
+        </Typography>
 
         <form onSubmit={handleSubmit}>
+          {isInviteRegistration && (
+            <TextField
+              fullWidth
+              label={translate("auth.preferredNameLabel")}
+              type="text"
+              variant="outlined"
+              margin="normal"
+              required
+              value={preferredName}
+              onChange={(e) => setPreferredName(e.target.value)}
+            />
+          )}
+
           <TextField
             fullWidth
             label={translate("auth.emailLabel")}
@@ -100,6 +138,7 @@ const Login = () => {
             variant="outlined"
             margin="normal"
             required
+            disabled={isInviteRegistration}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -123,26 +162,18 @@ const Login = () => {
             disabled={loading}
             sx={{ mt: 3, mb: 2 }}
           >
-            {loading ? translate("auth.processing") : (isSignUp ? translate("auth.signUpAction") : translate("auth.signInAction"))}
+            {loading ? translate("auth.processing") : (isInviteRegistration ? translate("auth.inviteCompleteAction") : translate("auth.signInAction"))}
           </Button>
         </form>
-
-        <Box textAlign="center">
-          <Typography variant="body2">
-            {isSignUp ? translate("auth.hasAccountQuestion") : translate("auth.noAccountQuestion")}{' '}
-            <Link 
-              component="button" 
-              variant="body2" 
-              onClick={() => {
-                setIsSignUp(!isSignUp);
-                setError(null);
-              }}
-            >
-              {isSignUp ? translate("auth.signInAction") : translate("auth.signUpAction")}
-            </Link>
-          </Typography>
-        </Box>
       </Paper>
+
+      <InfoModal
+        open={feedbackModal.open}
+        severity={feedbackModal.severity}
+        title={feedbackModal.title}
+        message={feedbackModal.message}
+        handleClose={handleFeedbackModalClose}
+      />
     </Box>
   );
 };

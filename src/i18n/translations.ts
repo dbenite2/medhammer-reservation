@@ -2,22 +2,35 @@ export const DEFAULT_LOCALE = "es";
 
 export const translations = {
     es: {
+        feedback: {
+            successTitle: "Listo",
+            errorTitle: "Algo salió mal",
+            warningTitle: "Atención",
+            infoTitle: "Información",
+            closeButton: "Cerrar",
+        },
         auth: {
             signInTitle: "Iniciar sesión en MedHammer",
-            signUpTitle: "Crear una cuenta",
+            existingUserHint: "Ingresa con el correo y la contraseña asignados.",
+            inviteTitle: "Completar registro",
+            inviteHint: "Tu invitación fue validada. Ingresa tu nombre y crea una contraseña.",
+            preferredNameLabel: "Nombre",
             emailLabel: "Correo electrónico",
             passwordLabel: "Contraseña",
             processing: "Procesando...",
             signInAction: "Iniciar sesión",
-            signUpAction: "Registrarse",
-            continueWithGoogle: "Continuar con Google",
-            googleProcessing: "Conectando con Google...",
-            googleSignInError: "No se pudo iniciar sesión con Google. Intenta de nuevo.",
-            emailDivider: "o continúa con correo",
-            hasAccountQuestion: "¿Ya tienes una cuenta?",
-            noAccountQuestion: "¿No tienes cuenta?",
-            signUpSuccess: "¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.",
+            inviteCompleteAction: "Completar registro",
+            inviteCompleteSuccess: "¡Registro completado!",
+            inviteInvalid: "La invitación no es válida o ya expiró. Solicita una nueva invitación.",
             authenticationError: "No se pudo completar la autenticación. Revisa tus datos e intenta de nuevo.",
+        },
+        userMenu: {
+            openMenuLabel: "Abrir menú de usuario",
+            myReservations: "Mis reservas",
+            myReservationsTitle: "Mis reservas",
+            emptyReservations: "No tienes reservas vigentes.",
+            signIn: "Iniciar sesión",
+            signOut: "Cerrar sesión",
         },
         calendar: {
             date: "Fecha",
@@ -50,6 +63,7 @@ export const translations = {
                 playTimeLabel: "Tiempo de juego",
                 gameTableLabel: "Mesa de juego",
                 confirmButton: "Confirmar reserva",
+                creatingButton: "Creando reserva...",
             },
             notification: {
                 title: "Reserva confirmada",
@@ -66,8 +80,10 @@ export const translations = {
             },
             alerts: {
                 notLoggedIn: "No has iniciado sesión.",
+                signInToCreate: "Inicia sesión para crear una reserva.",
                 createFailed: "No se pudo crear la reserva. Revisa la información e intenta de nuevo.",
                 createSuccess: "¡Reserva creada!",
+                selectTable: "Selecciona una mesa para crear la reserva.",
                 cancelFailed: "No se pudo cancelar la reserva. Intenta de nuevo.",
                 cancelSuccess: "Reserva cancelada.",
                 cancelNotAllowed: "Solo puedes cancelar tus propias reservas.",
