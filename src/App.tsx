@@ -1,9 +1,9 @@
-import { use, useEffect, useState } from 'react' 
+import { useEffect, useState } from 'react' 
 import './App.css'
 import Reserve from './pages/Reserve'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js'
-import { supabase } from './lib/supabase';
+import { hasStoredInviteLink, supabase } from './lib/supabase';
 import { CircularProgress, Box } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import Login from './pages/Login'
@@ -11,12 +11,13 @@ import Login from './pages/Login'
 
 
 const App = () => {
+  const isInviteLink = hasStoredInviteLink();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   //   // document.documentElement.classList.toggle("dark", theme === "dark");
   //   // localStorage.setItem("theme", theme);
   // }, [theme]);
-  const [mode, setMode] = useState<'light' | 'dark'>('light');
+  const [mode] = useState<'light' | 'dark'>('light');
   
   const theme = createTheme({
     palette: {
@@ -25,9 +26,9 @@ const App = () => {
   });
 
 
-useEffect(() => {
-  document.documentElement.dataset.theme = mode;
-}, [mode]);
+  useEffect(() => {
+    document.documentElement.dataset.theme = mode;
+  }, [mode]);
 
   useEffect(() => {
     // 1. Get the session right when the app loads
@@ -41,10 +42,7 @@ useEffect(() => {
       setSession(session);
     });
 
-    const systemDark = window.matchMedia(
-      '(prefers-color-scheme: dark)'
-    ).matches
-    setMode(systemDark ? 'dark' : 'light');
+    // setMode(systemDark ? 'dark' : 'light');
 
     // Cleanup the listener when the component unmounts
     return () => subscription.unsubscribe();
@@ -65,17 +63,16 @@ useEffect(() => {
         {/* Public Route: If they have a session, send them away from the login page */}
         <Route 
           path="/login" 
-          element={!session ? <Login /> : <Navigate to="/reserve" replace />} 
+          element={!session || isInviteLink ? <Login /> : <Navigate to="/reserve" replace />}
         />
 
-        {/* Protected Route: If they don't have a session, send them to login */}
         <Route 
           path="/reserve" 
-          element={session ? <Reserve /> : <Navigate to="/login" replace />} 
+          element={<Reserve />} 
         />
         <Route 
           path="/" 
-          element={<Navigate to="/login" replace />} 
+          element={isInviteLink ? <Login /> : <Navigate to="/reserve" replace />}
         />
         {/* <Route
           path='/'

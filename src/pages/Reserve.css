@@ -2,6 +2,8 @@
 .rbc-calendar {
   background: var(--bg);
   color: var(--text);
+  position: relative;
+  width: 100%;
   /* color: red; */
 }
 
@@ -12,6 +14,7 @@
 
 .rbc-toolbar {
     border-color: var(--btn-bg);
+    padding-right: 3.5rem;
 }
 .rbc-toolbar .rbc-toolbar-label {
   font-size: 2rem;
@@ -89,4 +92,38 @@ button:focus:not(:focus-visible) {
 
 .rbc-selected-cell {
   box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+.user-menu-container {
+  position: absolute;
+  right: 0.75rem;
+  top: 0.55rem;
+  z-index: 10;
+}
+
+.user-menu-button {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  height: 2.5rem;
+  width: 2.5rem;
+}
+
+.user-menu-button:hover {
+  background: var(--primary-soft);
+}
+
+.user-menu-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 1.125rem;
+}
+
+.user-menu-icon span {
+  background: currentColor;
+  border-radius: 999px;
+  display: block;
+  height: 0.125rem;
+  width: 100%;
 }
