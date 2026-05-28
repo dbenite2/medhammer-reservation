@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Calendar, dayjsLocalizer, type View } from 'react-big-calendar';
+import { Calendar, dayjsLocalizer, type ToolbarProps, type View } from 'react-big-calendar';
 import dayjs from 'dayjs';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import type { User } from '@supabase/supabase-js';
@@ -7,7 +7,7 @@ import type { AlertColor } from '@mui/material/Alert';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import ScheduleModal from '../components/booking/ScheduleModal';
-import { defaultHourValue, defaultPlayTimeValue, hourOptionValues } from '../utils/Constants';
+import { defaultHourValue, defaultPlayTimeValue, getTableDisplayName, hourOptionValues } from '../utils/Constants';
 
 import './Reserve.css';
 import NotificationModal from '../components/booking/NotificationModal';
@@ -18,6 +18,7 @@ import InfoModal from '../components/common/InfoModal';
 // Setup the localizer for the calendar using dayjs
 const localizer = dayjsLocalizer(dayjs);
 type ViewType = View //'month' | 'week' | 'day';
+const calendarViews: ViewType[] = ['month', 'week', 'day'];
 
 type FeedbackModalState = {
   open: boolean;
@@ -107,6 +108,48 @@ const MasterCalendarView = ()=> {
     showMore: (total: number) => translate("calendar.showMore", { total }),
   }), [translate]);
 
+  const calendarViewOptions = useMemo(() => ([
+    { value: 'month' as ViewType, label: translate("calendar.month") },
+    { value: 'week' as ViewType, label: translate("calendar.week") },
+    { value: 'day' as ViewType, label: translate("calendar.day") },
+  ]), [translate]);
+
+  const CalendarToolbar = useCallback(({ label, onNavigate, onView, view }: ToolbarProps<CalendarReservationEvent>) => (
+    <div className="calendar-toolbar">
+      <div className="calendar-toolbar-title-row">
+        <button type="button" className="calendar-nav-button" onClick={() => onNavigate('PREV')}>
+          {translate("calendar.previous")}
+        </button>
+        <h2 className="calendar-toolbar-title">{label}</h2>
+        <button type="button" className="calendar-nav-button" onClick={() => onNavigate('NEXT')}>
+          {translate("calendar.next")}
+        </button>
+      </div>
+
+      <div className="calendar-toolbar-controls">
+        <button type="button" className="calendar-today-button" onClick={() => onNavigate('TODAY')}>
+          {translate("calendar.today")}
+        </button>
+        <div className="calendar-view-toggle">
+          {calendarViewOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={view === option.value ? "calendar-view-button is-active" : "calendar-view-button"}
+              onClick={() => onView(option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  ), [calendarViewOptions, translate]);
+
+  const calendarComponents = useMemo(() => ({
+    toolbar: CalendarToolbar,
+  }), [CalendarToolbar]);
+
   const handleModalClose = () => {
     setIsBookingModalOpen(false);
     setSelectedTime(defaultHourValue)
@@ -148,6 +191,7 @@ const MasterCalendarView = ()=> {
         const startDateTime = dayjs(`${res.reservation_date}T${res.start_time}`).toDate();
         const endDateTime = dayjs(startDateTime).add(res.play_time, 'hour').toDate();
         const tableNumber = res.game_tables?.table_number ?? '';
+        const tableLabel = getTableDisplayName(tableNumber) || translate("reservation.notification.fallbackTitle");
         const createdByName = res.created_by_name || res.created_by_email || translate("reservation.unknownUser");
         const createdByEmail = res.created_by_email || '';
 
@@ -158,12 +202,30 @@ const MasterCalendarView = ()=> {
           createdByName,
           createdByEmail,
           tableNumber,
+          tableLabel,
           start: startDateTime,
           end: endDateTime,
         };
       });
       setEvents(formattedEvents);
     }
+  }, [translate]);
+
+  const sendReservationConfirmationEmail = useCallback(async (reservationId: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const { data, error } = await supabase.functions.invoke("send-reservation-email", {
+      body: { reservationId },
+      ...(session?.access_token ? { headers: { Authorization: `Bearer ${session.access_token}` } } : {}),
+    });
+
+    if (error) {
+      const context = "context" in error ? error.context : undefined;
+      const errorBody = context instanceof Response ? await context.text() : "";
+      console.error(translate("reservation.logs.sendReservationEmailError"), error, errorBody || data);
+      return false;
+    }
+
+    return true;
   }, [translate]);
 
   useEffect(() => {
@@ -216,7 +278,7 @@ const MasterCalendarView = ()=> {
 
       const createdByName = getUserDisplayName(user, translate("reservation.unknownUser"));
       const formattedDate = dayjs(selectedDate).format("YYYY-MM-DD");
-      const {error} = await supabase.from("reservations").insert([
+      const { data: createdReservation, error } = await supabase.from("reservations").insert([
           {
               user_id: user.id,
               table_id: selectedTableId,
@@ -227,7 +289,7 @@ const MasterCalendarView = ()=> {
               play_time: playtime,
               status: 'confirmed',
           }
-      ]);
+      ]).select("id").single();
 
       if (error) {
           console.error(translate("reservation.logs.createReservationError"), error);
@@ -236,9 +298,19 @@ const MasterCalendarView = ()=> {
           return;
       }
 
-      showFeedbackModal('success', translate("reservation.alerts.createSuccess"));
       handleModalClose();
       await fetchReservations();
+
+      if (!createdReservation?.id) {
+        showFeedbackModal('warning', translate("reservation.alerts.createSuccessEmailFailed"));
+        return;
+      }
+
+      const emailSent = await sendReservationConfirmationEmail(createdReservation.id);
+      showFeedbackModal(
+        emailSent ? 'success' : 'warning',
+        translate(emailSent ? "reservation.alerts.createSuccess" : "reservation.alerts.createSuccessEmailFailed")
+      );
     } finally {
       setCreatingReservation(false);
     }
@@ -298,7 +370,7 @@ const MasterCalendarView = ()=> {
   };
 
   return (
-    <div style={{ height: '100vh', width: '100%' }} className="rbc-calendar">
+    <div className="reserve-page">
       <UserMenu
         isSignedIn={Boolean(currentUserId)}
         reservations={currentUserReservations}
@@ -306,23 +378,26 @@ const MasterCalendarView = ()=> {
         handleSignOut={handleSignOut}
       />
 
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        selectable={true}
-        date={selectedDate}
-        onNavigate={handleNavigate}
-        onSelectSlot={handleSelectSlot}
-        views={['month', 'week', 'day']}
-        view={selectedView}
-        onView={setSelectedView}
-        style={{height: '100%'}}
-        onSelectEvent={handleSelectEvent}
-        messages={calendarMessages}
-        culture="es"
-      />
+      <div className="calendar-container">
+        <Calendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          selectable={true}
+          date={selectedDate}
+          onNavigate={handleNavigate}
+          onSelectSlot={handleSelectSlot}
+          views={calendarViews}
+          view={selectedView}
+          onView={setSelectedView}
+          style={{height: '100%'}}
+          onSelectEvent={handleSelectEvent}
+          messages={calendarMessages}
+          components={calendarComponents}
+          culture="es"
+        />
+      </div>
 
       <ScheduleModal
         modalOpen={isBookingModalOpen}

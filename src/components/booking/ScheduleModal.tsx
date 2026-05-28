@@ -1,7 +1,7 @@
 import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material"
 import dayjs from "dayjs"
 import type { Dispatch, SetStateAction } from "react";
-import { hourOptionValues, playTimeOptionValues } from "../../utils/Constants";
+import { getTableDisplayName, hourOptionValues, playTimeOptionValues } from "../../utils/Constants";
 import { useTranslate } from "../../i18n/useTranslate";
 
 interface Props {
@@ -75,7 +75,7 @@ const ScheduleModal = ({modalOpen, selectedDate, selectedTime, playTime, handleM
             >
               {tables.map((table) => (
                 <MenuItem key={table.id} value={table.id}>
-                  {translate("reservation.tableLabel", { tableNumber: table.table_number })}
+                  {getTableDisplayName(table.table_number)}
                 </MenuItem>
               ))}
             </Select>

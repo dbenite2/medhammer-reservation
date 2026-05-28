@@ -17,6 +17,7 @@ export type CalendarReservationEvent = {
     createdByName: string;
     createdByEmail: string;
     tableNumber: string | number;
+    tableLabel: string;
     start: Date;
     end: Date;
 };
