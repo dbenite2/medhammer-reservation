@@ -1,4 +1,30 @@
-# React + TypeScript + Vite
+# Medhammer Reservation
+
+## Deployment
+
+This is a client-rendered Vite app. Production hosts must serve `dist/index.html` for direct visits to React Router routes such as `/reserve`.
+
+### Vercel
+
+The root `vercel.json` rewrites all unmatched routes to `/index.html`, which keeps direct links and refreshes working for `/reserve`.
+
+Build settings:
+
+- Build command: `yarn build`
+- Output directory: `dist`
+- Environment variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+
+### Hostinger / Apache
+
+Build the app with `yarn build`, then deploy the contents of `dist` to the domain's `public_html` directory. Vite copies `public/.htaccess` into `dist`, so Hostinger can also serve `/reserve` and other client-side routes directly.
+
+If replacing an existing WordPress site, back up the current `public_html` content first, then replace the WordPress files with the generated `dist` contents.
+
+### Domain
+
+You can either point the domain to Vercel and keep using Vercel deployments, or host the static build directly on Hostinger. Vercel is usually easier for automatic Git-based deployments; Hostinger works for manual/static deployments.
+
+## Vite Template Notes
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
