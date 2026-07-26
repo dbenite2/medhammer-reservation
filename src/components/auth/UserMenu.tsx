@@ -3,6 +3,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Ico
 import dayjs from "dayjs";
 import type { CalendarReservationEvent } from "../../types";
 import { useTranslate } from "../../i18n/useTranslate";
+import { getTableDisplayName } from "../../utils/Constants";
 
 interface Props {
     isSignedIn: boolean;
@@ -38,21 +39,48 @@ const UserMenu = ({ isSignedIn, reservations, handleSignIn, handleSignOut }: Pro
     };
 
     return (
-        <div className="user-menu-container">
-            <IconButton
-                className="user-menu-button"
-                aria-label={translate("userMenu.openMenuLabel")}
-                aria-controls={anchorElement ? "user-menu" : undefined}
-                aria-expanded={anchorElement ? "true" : undefined}
-                aria-haspopup="true"
-                onClick={(event) => setAnchorElement(event.currentTarget)}
-            >
-                <span className="user-menu-icon" aria-hidden="true">
-                    <span />
-                    <span />
-                    <span />
-                </span>
-            </IconButton>
+        <header className="calendar-header">
+            <div className="calendar-header-copy">
+                <Typography variant="h6" component="h1" className="calendar-header-title">
+                    {translate("userMenu.headerTitle")}
+                </Typography>
+            </div>
+
+            <div className="calendar-header-actions calendar-header-actions-desktop">
+                <Stack direction="row" spacing={1} useFlexGap>
+                    {isSignedIn ? (
+                        <>
+                            <Button variant="outlined" color="primary" onClick={openReservations}>
+                                {translate("userMenu.myReservations")}
+                            </Button>
+                            <Button variant="contained" color="primary" onClick={signOut}>
+                                {translate("userMenu.signOut")}
+                            </Button>
+                        </>
+                    ) : (
+                        <Button variant="contained" color="primary" onClick={handleSignIn}>
+                            {translate("userMenu.signIn")}
+                        </Button>
+                    )}
+                </Stack>
+            </div>
+
+            <div className="calendar-header-mobile-menu">
+                <IconButton
+                    className="calendar-header-menu-button"
+                    aria-label={translate("userMenu.openMenuLabel")}
+                    aria-controls={anchorElement ? "user-menu" : undefined}
+                    aria-expanded={anchorElement ? "true" : undefined}
+                    aria-haspopup="true"
+                    onClick={(event) => setAnchorElement(event.currentTarget)}
+                >
+                    <span className="calendar-header-menu-icon" aria-hidden="true">
+                        <span />
+                        <span />
+                        <span />
+                    </span>
+                </IconButton>
+            </div>
 
             <Menu
                 id="user-menu"
@@ -86,7 +114,7 @@ const UserMenu = ({ isSignedIn, reservations, handleSignIn, handleSignOut }: Pro
                             {sortedReservations.map((reservation) => (
                                 <Stack key={reservation.id} spacing={0.5}>
                                     <Typography variant="h6" component="p">
-                                        {translate("reservation.tableLabel", { tableNumber: reservation.tableNumber })}
+                                        {reservation.tableLabel || getTableDisplayName(reservation.tableNumber) || translate("reservation.tableLabel", { tableNumber: reservation.tableNumber })}
                                     </Typography>
                                     <Typography color="text.secondary">
                                         {dayjs(reservation.start).format(translate("reservation.dateFormat"))}
@@ -109,7 +137,7 @@ const UserMenu = ({ isSignedIn, reservations, handleSignIn, handleSignOut }: Pro
                     </Button>
                 </DialogActions>
             </Dialog>
-        </div>
+        </header>
     );
 };
 

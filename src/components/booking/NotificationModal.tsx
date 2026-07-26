@@ -2,6 +2,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Sta
 import dayjs from "dayjs";
 import type { CalendarReservationEvent } from "../../types";
 import { useTranslate } from "../../i18n/useTranslate";
+import { getTableDisplayName } from "../../utils/Constants";
 
 interface Props {
     reservation: CalendarReservationEvent | null;
@@ -21,9 +22,7 @@ const NotificationModal = ({reservation, modalOpen, canCancelReservation, cancel
     const durationLabel = durationInMinutes >= 60
         ? translate("reservation.duration.hours", { hours: durationInMinutes / 60 })
         : translate("reservation.duration.minutes", { minutes: durationInMinutes });
-    const tableLabel = reservation?.tableNumber
-        ? translate("reservation.tableLabel", { tableNumber: reservation.tableNumber })
-        : translate("reservation.notification.fallbackTitle");
+    const tableLabel = reservation?.tableLabel || getTableDisplayName(reservation?.tableNumber) || translate("reservation.notification.fallbackTitle");
 
     return (
       <Dialog open={modalOpen && Boolean(reservation)} onClose={handleModalClose} fullWidth maxWidth="sm">

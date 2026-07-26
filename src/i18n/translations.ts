@@ -25,6 +25,7 @@ export const translations = {
             authenticationError: "No se pudo completar la autenticación. Revisa tus datos e intenta de nuevo.",
         },
         userMenu: {
+            headerTitle: "MedHammer Reservas",
             openMenuLabel: "Abrir menú de usuario",
             myReservations: "Mis reservas",
             myReservationsTitle: "Mis reservas",
@@ -82,7 +83,8 @@ export const translations = {
                 notLoggedIn: "No has iniciado sesión.",
                 signInToCreate: "Inicia sesión para crear una reserva.",
                 createFailed: "No se pudo crear la reserva. Revisa la información e intenta de nuevo.",
-                createSuccess: "¡Reserva creada!",
+                createSuccess: "¡Reserva creada! Te enviamos un correo de confirmación.",
+                createSuccessEmailFailed: "Reserva creada, pero no pudimos enviar el correo de confirmación.",
                 selectTable: "Selecciona una mesa para crear la reserva.",
                 cancelFailed: "No se pudo cancelar la reserva. Intenta de nuevo.",
                 cancelSuccess: "Reserva cancelada.",
@@ -92,6 +94,7 @@ export const translations = {
                 fetchTablesError: "Error al cargar las mesas:",
                 fetchReservationsError: "Error al cargar las reservas:",
                 createReservationError: "No se pudo crear la reserva:",
+                sendReservationEmailError: "No se pudo enviar el correo de confirmación:",
                 cancelReservationError: "No se pudo cancelar la reserva:",
             },
             duration: {
