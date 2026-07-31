@@ -89,6 +89,7 @@ export const translations = {
                 createSuccess: "¡Reserva creada! Te enviamos un correo de confirmación.",
                 createSuccessEmailFailed: "Reserva creada, pero no pudimos enviar el correo de confirmación.",
                 selectTable: "Selecciona una mesa para crear la reserva.",
+                pastNotAllowed: "No puedes crear reservas en fechas u horas pasadas.",
                 cancelFailed: "No se pudo cancelar la reserva. Intenta de nuevo.",
                 cancelSuccess: "Reserva cancelada.",
                 cancelNotAllowed: "Solo puedes cancelar tus propias reservas.",

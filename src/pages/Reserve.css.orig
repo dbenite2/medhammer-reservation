@@ -137,6 +137,12 @@
 .calendar-today-button,
 .calendar-view-button {
   background: transparent;
+.rbc-day-bg.reservation-slot-past,
+.rbc-time-slot.reservation-slot-past {
+  background: rgba(107, 114, 128, 0.14);
+  cursor: not-allowed;
+}
+
   border: 1px solid var(--btn-bg);
   border-radius: 6px;
   color: var(--btn-bg);
@@ -145,12 +151,6 @@
   line-height: 1.2;
   padding: 0.45rem 0.75rem;
   white-space: nowrap;
-}
-
-.rbc-day-bg.reservation-slot-past,
-.rbc-time-slot.reservation-slot-past {
-  background: rgba(107, 114, 128, 0.14);
-  cursor: not-allowed;
 }
 
 .calendar-view-button {
