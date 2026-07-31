@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 export const hourOptionValues = [
     "06:00",
     "07:00",
@@ -23,6 +25,23 @@ export const playTimeOptionValues = [1, 2, 3, 4, 5] as const;
 
 export const defaultHourValue: string = "18:00";
 export const defaultPlayTimeValue: number = 1;
+
+export const getReservationStart = (date: Date, time: string) => {
+    return dayjs(`${dayjs(date).format("YYYY-MM-DD")}T${time}`);
+};
+
+export const isReservationDayInPast = (date: Date) => {
+    return dayjs(date).endOf("day").isBefore(dayjs());
+};
+
+export const isReservationStartInPast = (date: Date, time: string) => {
+    return getReservationStart(date, time).isBefore(dayjs());
+};
+
+export const getFirstAvailableHour = (date: Date, preferredTime = defaultHourValue) => {
+    if (!isReservationStartInPast(date, preferredTime)) return preferredTime;
+    return hourOptionValues.find((time) => !isReservationStartInPast(date, time)) ?? null;
+};
 
 export const tableLabels = {
     0: 'Mesa garaje 1 - Bastión del Dragón',

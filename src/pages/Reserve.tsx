@@ -7,7 +7,7 @@ import type { AlertColor } from '@mui/material/Alert';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import ScheduleModal from '../components/booking/ScheduleModal';
-import { defaultHourValue, defaultPlayTimeValue, getTableDisplayName, hourOptionValues } from '../utils/Constants';
+import { defaultHourValue, defaultPlayTimeValue, getFirstAvailableHour, getTableDisplayName, hourOptionValues, isReservationDayInPast, isReservationStartInPast } from '../utils/Constants';
 
 import './Reserve.css';
 import NotificationModal from '../components/booking/NotificationModal';
@@ -150,6 +150,14 @@ const MasterCalendarView = ()=> {
     toolbar: CalendarToolbar,
   }), [CalendarToolbar]);
 
+  const dayPropGetter = useCallback((date: Date) => (
+    isReservationDayInPast(date) ? { className: 'reservation-slot-past' } : {}
+  ), []);
+
+  const slotPropGetter = useCallback((date: Date) => (
+    isReservationStartInPast(date, dayjs(date).format('HH:mm')) ? { className: 'reservation-slot-past' } : {}
+  ), []);
+
   const handleModalClose = () => {
     setIsBookingModalOpen(false);
     setSelectedTime(defaultHourValue)
@@ -241,6 +249,11 @@ const MasterCalendarView = ()=> {
 
   // This fires when a user clicks a day on the calendar
   const handleSelectSlot = async ({ start }: { start: Date }) => {
+    if (isReservationDayInPast(start)) {
+      showFeedbackModal('warning', translate("reservation.alerts.pastNotAllowed"));
+      return;
+    }
+
     if (!currentUserId) {
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -255,14 +268,33 @@ const MasterCalendarView = ()=> {
     const selectedHour = dayjs(start).format("HH:00");
     const hourOption = hourOptionValues.find((value) => value === selectedHour);
 
+    if (selectedView !== 'month' && hourOption && isReservationStartInPast(start, hourOption)) {
+      showFeedbackModal('warning', translate("reservation.alerts.pastNotAllowed"));
+      return;
+    }
+
+    const initialTime = selectedView === 'month'
+      ? getFirstAvailableHour(start)
+      : hourOption ?? getFirstAvailableHour(start);
+
+    if (!initialTime) {
+      showFeedbackModal('warning', translate("reservation.alerts.pastNotAllowed"));
+      return;
+    }
+
     setSelectedDate(start);
-    setSelectedTime(hourOption ?? defaultHourValue);
+    setSelectedTime(initialTime);
     setIsBookingModalOpen(true);
   };
 
   const handleCreateReservation = async () => {
     if (!selectedDate || !selectedTableId) {
         showFeedbackModal('warning', translate("reservation.alerts.selectTable"));
+        return;
+    }
+
+    if (isReservationStartInPast(selectedDate, selectedTime)) {
+        showFeedbackModal('warning', translate("reservation.alerts.pastNotAllowed"));
         return;
     }
 
@@ -388,6 +420,8 @@ const MasterCalendarView = ()=> {
           date={selectedDate}
           onNavigate={handleNavigate}
           onSelectSlot={handleSelectSlot}
+          dayPropGetter={dayPropGetter}
+          slotPropGetter={slotPropGetter}
           views={calendarViews}
           view={selectedView}
           onView={setSelectedView}

@@ -1,7 +1,7 @@
 import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material"
 import dayjs from "dayjs"
 import type { Dispatch, SetStateAction } from "react";
-import { getTableDisplayName, hourOptionValues, playTimeOptionValues } from "../../utils/Constants";
+import { getTableDisplayName, hourOptionValues, isReservationStartInPast, playTimeOptionValues } from "../../utils/Constants";
 import { useTranslate } from "../../i18n/useTranslate";
 
 interface Props {
@@ -21,6 +21,7 @@ interface Props {
 
 const ScheduleModal = ({modalOpen, selectedDate, selectedTime, playTime, handleModalClose ,setPlayTime , setSelectedTime, tables, handleCreateReservation, selectedTableId, setSelectedTableId, creatingReservation}: Props) => {
     const translate = useTranslate();
+    const selectedStartIsPast = isReservationStartInPast(selectedDate, selectedTime);
 
     return (
     <Dialog open={modalOpen} onClose={handleModalClose} fullWidth maxWidth="sm">
@@ -44,7 +45,11 @@ const ScheduleModal = ({modalOpen, selectedDate, selectedTime, playTime, handleM
               onChange={(e) => setSelectedTime(e.target.value)}
             >
                 {hourOptionValues.map((value) => (
-                  <MenuItem key={value} value={value}>
+                  <MenuItem
+                    key={value}
+                    value={value}
+                    disabled={isReservationStartInPast(selectedDate, value)}
+                  >
                     {translate(`reservation.hourOptions.${value}`)}
                   </MenuItem>
                 ))}
@@ -89,7 +94,7 @@ const ScheduleModal = ({modalOpen, selectedDate, selectedTime, playTime, handleM
         variant="contained"
         color="primary"
         onClick={handleCreateReservation}
-        disabled={creatingReservation}
+        disabled={creatingReservation || selectedStartIsPast}
         sx={{ gap: 1, minWidth: 170 }}
       >
         {creatingReservation && <CircularProgress size={18} color="inherit" />}
