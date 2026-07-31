@@ -11,7 +11,7 @@ import Login from './pages/Login'
 
 
 const App = () => {
-  const isInviteLink = hasStoredInviteLink();
+  const [isInviteFlow, setIsInviteFlow] = useState(() => hasStoredInviteLink());
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   //   // document.documentElement.classList.toggle("dark", theme === "dark");
@@ -63,16 +63,18 @@ const App = () => {
         {/* Public Route: If they have a session, send them away from the login page */}
         <Route 
           path="/login" 
-          element={!session || isInviteLink ? <Login /> : <Navigate to="/reserve" replace />}
+          element={!session || isInviteFlow
+            ? <Login onInviteCompleted={() => setIsInviteFlow(false)} />
+            : <Navigate to="/reserve" replace />}
         />
 
         <Route 
           path="/reserve" 
-          element={<Reserve />} 
+          element={isInviteFlow ? <Navigate to="/login" replace /> : <Reserve />}
         />
         <Route 
           path="/" 
-          element={isInviteLink ? <Login /> : <Navigate to="/reserve" replace />}
+          element={<Navigate to={isInviteFlow ? "/login" : "/reserve"} replace />}
         />
         {/* <Route
           path='/'

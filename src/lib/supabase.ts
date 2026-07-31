@@ -4,11 +4,20 @@ import {
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const initialAuthParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+const initialAuthHashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+const initialAuthQueryParams = new URLSearchParams(window.location.search);
 export const INVITE_LINK_STORAGE_KEY = "medhammer.invite-link";
 
-export const initialAuthLinkType = initialAuthParams.get("type");
-export const isInitialInviteLink = initialAuthLinkType === "invite";
+const initialAuthLinkType = initialAuthHashParams.get("type");
+const initialQueryInviteToken = initialAuthQueryParams.get("token_hash");
+
+export const getPendingInviteToken = () => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("token_hash");
+};
+
+export const isInitialInviteLink = initialAuthLinkType === "invite"
+    || Boolean(initialQueryInviteToken);
 
 if (isInitialInviteLink) {
     window.sessionStorage.setItem(INVITE_LINK_STORAGE_KEY, "true");
