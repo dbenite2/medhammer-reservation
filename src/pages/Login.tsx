@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { clearStoredInviteLink, getPendingInviteToken, hasStoredInviteLink, supabase } from '../lib/supabase';
-import { Box, Button, Paper, TextField, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Paper, TextField, Typography } from '@mui/material';
 import type { AlertColor } from '@mui/material/Alert';
 import { useTranslate } from '../i18n/useTranslate';
 import InfoModal from '../components/common/InfoModal';
@@ -27,10 +27,19 @@ type LoginProps = {
 const Login = ({ onInviteCompleted }: LoginProps) => {
   const translate = useTranslate();
   const navigate = useNavigate();
-  const [isInviteRegistration] = useState(() => hasStoredInviteLink());
-  const [pendingInviteToken] = useState(() => getPendingInviteToken());
-  const [inviteReady, setInviteReady] = useState(
-    () => isInviteRegistration && !getPendingInviteToken()
+  const [initialInviteState] = useState(() => {
+    const token = getPendingInviteToken();
+
+    return {
+      token,
+      active: Boolean(token) || hasStoredInviteLink(),
+    };
+  });
+  const pendingInviteToken = initialInviteState.token;
+  const [isInviteRegistration, setIsInviteRegistration] = useState(initialInviteState.active);
+  const [inviteReady, setInviteReady] = useState(false);
+  const [checkingInviteSession, setCheckingInviteSession] = useState(
+    initialInviteState.active && !initialInviteState.token
   );
   
   // Form State
@@ -68,18 +77,31 @@ const Login = ({ onInviteCompleted }: LoginProps) => {
   };
 
   useEffect(() => {
-    if (!isInviteRegistration || !inviteReady) return;
+    if (!checkingInviteSession) return;
+
+    let cancelled = false;
 
     supabase.auth.getUser().then(({ data: { user }, error: userError }) => {
+      if (cancelled) return;
+
       if (userError || !user) {
-        showFeedbackModal('error', translate("auth.inviteInvalid"));
+        clearStoredInviteLink();
+        setIsInviteRegistration(false);
+        onInviteCompleted?.();
+        setCheckingInviteSession(false);
         return;
       }
 
       setEmail(user.email ?? '');
       setPreferredName(user.user_metadata?.preferred_name || user.user_metadata?.full_name || user.user_metadata?.name || '');
+      setInviteReady(true);
+      setCheckingInviteSession(false);
     });
-  }, [inviteReady, isInviteRegistration, showFeedbackModal, translate]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [checkingInviteSession, onInviteCompleted]);
 
   const handleAcceptInvite = async () => {
     if (!pendingInviteToken) return;
@@ -169,7 +191,11 @@ const Login = ({ onInviteCompleted }: LoginProps) => {
             : translate("auth.existingUserHint")}
         </Typography>
 
-        {!inviteReady && pendingInviteToken ? (
+        {checkingInviteSession ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+            <CircularProgress size={32} />
+          </Box>
+        ) : !inviteReady && pendingInviteToken ? (
           <Button
             type="button"
             fullWidth

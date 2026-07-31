@@ -1,13 +1,24 @@
 import { useEffect, useState } from 'react' 
 import './App.css'
 import Reserve from './pages/Reserve'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js'
 import { hasStoredInviteLink, supabase } from './lib/supabase';
 import { CircularProgress, Box } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import Login from './pages/Login'
 
+
+const InviteRedirectToLogin = () => {
+  const { search, hash } = useLocation();
+
+  return (
+    <Navigate
+      to={{ pathname: '/login', search, hash }}
+      replace
+    />
+  );
+};
 
 
 const App = () => {
@@ -66,11 +77,13 @@ const App = () => {
 
         <Route 
           path="/reserve" 
-          element={isInviteFlow ? <Navigate to="/login" replace /> : <Reserve />}
+          element={isInviteFlow ? <InviteRedirectToLogin /> : <Reserve />}
         />
         <Route 
           path="/" 
-          element={<Navigate to={isInviteFlow ? "/login" : "/reserve"} replace />}
+          element={isInviteFlow
+            ? <InviteRedirectToLogin />
+            : <Navigate to="/reserve" replace />}
         />
         {/* <Route
           path='/'
