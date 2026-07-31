@@ -31,24 +31,21 @@ const App = () => {
   }, [mode]);
 
   useEffect(() => {
-    // 1. Get the session right when the app loads
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
     });
 
-    // 2. Set up a listener so React updates instantly if they log in or out
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
 
     // setMode(systemDark ? 'dark' : 'light');
 
-    // Cleanup the listener when the component unmounts
     return () => subscription.unsubscribe();
   }, []);
 
-  // Show a clean MUI loading spinner while checking the database
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
@@ -60,7 +57,6 @@ const App = () => {
     <ThemeProvider theme={theme} data-theme={mode}>
     <Router>
       <Routes>
-        {/* Public Route: If they have a session, send them away from the login page */}
         <Route 
           path="/login" 
           element={!session || isInviteFlow
