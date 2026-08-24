@@ -325,7 +325,7 @@ const MasterCalendarView = ()=> {
 
       if (error) {
           console.error(translate("reservation.logs.createReservationError"), error);
-          showFeedbackModal('error', translate("reservation.alerts.createFailed"));
+          showFeedbackModal('error', error.message || translate("reservation.alerts.createFailed"));
           await fetchReservations();
           return;
       }
