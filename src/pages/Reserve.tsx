@@ -18,6 +18,21 @@ import InfoModal from '../components/common/InfoModal';
 // Setup the localizer for the calendar using dayjs
 const localizer = dayjsLocalizer(dayjs);
 type ViewType = View //'month' | 'week' | 'day';
+
+const getReservationColorVariant = (reservationId: string) => {
+  let hash = 0;
+
+  for (const character of reservationId) {
+    hash = ((hash * 31) + character.charCodeAt(0)) >>> 0;
+  }
+
+  return hash % 4;
+};
+
+const getReservationEventProps = (event: CalendarReservationEvent) => ({
+  className: `reservation-event reservation-event--${getReservationColorVariant(event.id)}`,
+});
+
 const calendarViews: ViewType[] = ['month', 'week', 'day'];
 
 type FeedbackModalState = {
@@ -422,6 +437,7 @@ const MasterCalendarView = ()=> {
           onSelectSlot={handleSelectSlot}
           dayPropGetter={dayPropGetter}
           slotPropGetter={slotPropGetter}
+          eventPropGetter={getReservationEventProps}
           views={calendarViews}
           view={selectedView}
           onView={setSelectedView}
