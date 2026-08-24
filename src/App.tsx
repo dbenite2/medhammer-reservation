@@ -4,7 +4,7 @@ import Reserve from './pages/Reserve'
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js'
 import { hasStoredInviteLink, supabase } from './lib/supabase';
-import { CircularProgress, Box } from '@mui/material';
+import { CircularProgress, Box, CssBaseline } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import Login from './pages/Login'
 
@@ -32,7 +32,41 @@ const App = () => {
   
   const theme = createTheme({
     palette: {
-      mode: mode,  // 'light' or 'dark'
+      mode,
+      primary: {
+        main: '#2D4059',
+        light: '#53677F',
+        dark: '#1F2D40',
+        contrastText: '#FFFFFF',
+      },
+      secondary: {
+        main: '#EA5455',
+        light: '#F07B7C',
+        dark: '#C53F46',
+        contrastText: '#FFFFFF',
+      },
+      error: {
+        main: '#EA5455',
+      },
+      warning: {
+        main: '#F07B3F',
+        contrastText: '#2D4059',
+      },
+      success: {
+        main: '#2D4059',
+      },
+      background: {
+        default: '#FFF9EC',
+        paper: '#FFFFFF',
+      },
+      text: {
+        primary: '#2D4059',
+        secondary: '#657184',
+      },
+      divider: 'rgba(45, 64, 89, 0.18)',
+    },
+    shape: {
+      borderRadius: 8,
     },
   });
 
@@ -66,6 +100,7 @@ const App = () => {
   }
   return (
     <ThemeProvider theme={theme} data-theme={mode}>
+    <CssBaseline />
     <Router>
       <Routes>
         <Route 

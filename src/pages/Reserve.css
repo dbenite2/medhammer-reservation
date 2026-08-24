@@ -149,7 +149,7 @@
 
 .rbc-day-bg.reservation-slot-past,
 .rbc-time-slot.reservation-slot-past {
-  background: rgba(107, 114, 128, 0.14);
+  background: rgba(45, 64, 89, 0.08);
   cursor: not-allowed;
 }
 
@@ -167,16 +167,30 @@
 .calendar-today-button:hover,
 .calendar-view-button:hover {
   background: var(--btn-hover);
-  color: #0b1220;
+  color: var(--text);
 }
 
 .calendar-view-button.is-active {
   background: var(--btn-active);
-  color: #0b1220;
+  color: var(--text);
 }
 
 button:focus:not(:focus-visible) {
   outline: none;
+}
+
+.rbc-month-row + .rbc-month-row,
+.rbc-day-bg + .rbc-day-bg,
+.rbc-time-content > * + *,
+.rbc-timeslot-group,
+.rbc-time-header-content {
+  border-color: var(--border);
+}
+
+.rbc-show-more {
+  background: transparent;
+  color: #EA5455;
+  font-weight: 700;
 }
 
 .rbc-header {
@@ -204,8 +218,30 @@ button:focus:not(:focus-visible) {
 
 .rbc-event {
   background: var(--event-bg);
+  border: 1px solid var(--event-0-border);
+  border-left-width: 4px;
   border-radius: 6px;
-  color: #0b1220;
+  color: var(--event-text);
+}
+
+.rbc-event.reservation-event--0 {
+  background: var(--event-0-bg);
+  border-color: var(--event-0-border);
+}
+
+.rbc-event.reservation-event--1 {
+  background: var(--event-1-bg);
+  border-color: var(--event-1-border);
+}
+
+.rbc-event.reservation-event--2 {
+  background: var(--event-2-bg);
+  border-color: var(--event-2-border);
+}
+
+.rbc-event.reservation-event--3 {
+  background: var(--event-3-bg);
+  border-color: var(--event-3-border);
 }
 
 .rbc-selected {
