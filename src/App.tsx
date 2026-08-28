@@ -7,6 +7,7 @@ import { hasStoredInviteLink, supabase } from './lib/supabase';
 import { CircularProgress, Box, CssBaseline } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import Login from './pages/Login'
+import { Analytics } from '@vercel/analytics/react'
 
 
 const InviteRedirectToLogin = () => {
@@ -130,6 +131,7 @@ const App = () => {
         /> */}
       </Routes>
     </Router>
+    <Analytics />
     </ThemeProvider>
   )
 }
