@@ -53,7 +53,7 @@ export const tableLabels = {
     6: 'Mesa balcón 1 - Torre del Cuervo',
     7: 'Mesa balcón 2 - Balcón del Fénix',
     8: 'Mesa ventana segundo piso - Atalaya de la Luna',
-    9: 'Mesa sobre cocina - Altar de la Forja'
+    9: 'Mesa sobre cocina - Caverna del troll'
 } as const;
 
 type TableLabelKey = keyof typeof tableLabels;
